@@ -33,6 +33,7 @@ class CreateStation(Realm):
                  _host=None,
                  _port=None,
                  _mode=0,
+                 _ap=None,
                  _sta_list=None,
                  _sta_flags=None,
                  _number_template="00000",
@@ -58,6 +59,7 @@ class CreateStation(Realm):
         self.number_template = _number_template
         self.debug = _debug_on
         self.up = _up
+        self.ap = ap
         self.set_txo_data = _set_txo_data
         self.station_profile = self.new_station_profile()
         self.station_profile.lfclient_url = self.lfclient_url
@@ -74,7 +76,10 @@ class CreateStation(Realm):
             print("----- Station List ----- ----- ----- ----- ----- ----- \n")
             pprint.pprint(self.sta_list)
             print("---- ~Station List ----- ----- ----- ----- ----- ----- \n")
-
+            
+        if self.ap is not None:
+            self.station_profile.set_command_param("add_sta", "ap", self.ap)
+            
     def build(self):
         # Build stations
         self.station_profile.use_security(
@@ -157,6 +162,12 @@ def main():
         required=False,
         default=None,
         action='append')
+     optional.add_argument(
+        '--ap',
+        help='set bssid of router',
+        required=False,
+        default=None,
+        action='append')
 
     args = parser.parse_args()
 
@@ -179,6 +190,7 @@ def main():
     if (args.num_stations is not None) and (int(args.num_stations) > 0):
         num_stations_converted = int(args.num_stations)
         num_sta = num_stations_converted
+    
 
     station_list = LFUtils.port_name_series(prefix="sta",
                                             start_id=start_id,
